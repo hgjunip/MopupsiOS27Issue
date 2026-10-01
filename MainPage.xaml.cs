@@ -1,23 +1,33 @@
-﻿namespace MopupsIssue;
+using Mopups.Pages;
+using Mopups.Services;
+
+namespace MopupsIssue;
 
 public partial class MainPage : ContentPage
 {
-    int count = 0;
-
     public MainPage()
     {
         InitializeComponent();
+#if IOS
+        // Mopups sizes popups from this; on iOS 27 its Y and height are NaN
+#pragma warning disable CA1422
+        ApplicationFrameLabel.Text = $"UIScreen.ApplicationFrame: {UIKit.UIScreen.MainScreen.ApplicationFrame}";
+#pragma warning restore CA1422
+#endif
     }
 
-    private void OnCounterClicked(object? sender, EventArgs e)
+    private async void OnShowPopupClicked(object? sender, EventArgs e)
     {
-        count++;
-
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
+        await MopupService.Instance.PushAsync(new PopupPage
+        {
+            Content = new Label
+            {
+                Text = "Popup",
+                BackgroundColor = Colors.White,
+                Padding = 24,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center
+            }
+        });
     }
 }
